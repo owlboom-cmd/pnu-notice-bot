@@ -44,7 +44,7 @@ for notice in notices_main:
     try:
         # 주의: 본부 홈페이지는 태그 이름이 기계공학과 다를 수 있습니다. 
         # 예시로 'td.subject a'를 임시로 넣었습니다.
-        title = notice.select_one('td.subject a').text.strip()
+        title = notice.select_one('td.subject').text.strip()
         date_text = notice.select_one('td.date').text.strip()
         
         if today in date_text:
