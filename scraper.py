@@ -1,23 +1,25 @@
 import os
 import requests
+import urllib3
 from bs4 import BeautifulSoup
 from datetime import datetime
+
+# SSL 보안 경고 메시지 숨기기
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 TOKEN = os.environ.get('TELEGRAM_TOKEN')
 CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
 
-# 기계공학부 또는 대학 본부 공지사항 URL
 URL = "https://me.pusan.ac.kr/new/sub05/sub05_01.asp"
 
 def send_message(text):
     requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": text})
 
-# 웹페이지 접속해서 데이터 가져오기
-response = requests.get(URL)
+# verify=False 를 추가하여 웹사이트 보안 인증서 검사를 무시하고 접속
+response = requests.get(URL, verify=False)
 soup = BeautifulSoup(response.text, 'html.parser')
 today = datetime.now().strftime("%Y-%m-%d")
 
-# 공지사항 목록 추출 (td.title, td.date 등은 실제 HTML 구조에 맞춰 수정 필요)
 notices = soup.select('table tbody tr')
 for notice in notices:
     try:
