@@ -3,7 +3,7 @@ import requests
 import urllib3
 from bs4 import BeautifulSoup
 from datetime import datetime
-from urllib.parse import urljoin # 링크를 합쳐주는 기능 추가
+from urllib.parse import urljoin
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -21,12 +21,12 @@ today_short = datetime.now().strftime("%y.%m.%d")
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
 
 # ========================================
-# 1. 기계공학부 공지사항
+# 1. 기계공학부 공지사항 (주소 php로 수정됨!)
 # ========================================
 try:
-    url_me = "https://me.pusan.ac.kr/new/sub05/sub05_01.asp"
+    url_me = "https://me.pusan.ac.kr/new/sub05/sub01_01.php"
     res_me = requests.get(url_me, verify=False, headers=headers)
-    res_me.encoding = 'euc-kr'
+    # php 페이지는 보통 utf-8을 사용하므로 기존 euc-kr 강제 변환 코드는 제거했습니다.
     soup_me = BeautifulSoup(res_me.text, 'html.parser')
 
     rows_me = soup_me.select('table tr')
@@ -36,11 +36,10 @@ try:
             title_tag = row.select_one('a')
             if title_tag:
                 title = title_tag.text.strip()
-                date_text = tds[-2].text.strip()
+                date_text = tds[-2].text.strip() # 보통 표의 뒤에서 두 번째 칸이 날짜
                 
-                # 💡 링크 추출 및 전체 주소로 만들기
                 link = title_tag.get('href', '')
-                full_link = urljoin(url_me, link) 
+                full_link = urljoin(url_me, link)
                 
                 if today_hyphen in date_text or today_dot in date_text or today_short in date_text:
                     send_message(f"[기계공학부] {title}\n👉 {full_link}")
@@ -64,7 +63,6 @@ try:
             title = title_tag.text.strip()
             date_text = date_tag.text.strip()
             
-            # 💡 링크 추출 및 전체 주소로 만들기
             link = title_tag.get('href', '')
             full_link = urljoin(url_main, link)
             
