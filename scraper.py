@@ -15,11 +15,10 @@ def send_message(text):
     if TOKEN and CHAT_ID:
         requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": text})
 
-# 다시 원래대로 오늘 날짜를 스스로 찾도록 되돌려 놓았습니다.
-# (당장 테스트가 필요하면 이전처럼 "2026-10-30" 등으로 날짜를 잠시 고정해서 돌려보세요)
-today_hyphen = datetime.now().strftime("%Y-%m-%d")
-today_dot = datetime.now().strftime("%Y.%m.%d")
-today_short = datetime.now().strftime("%y.%m.%d")
+# 기존의 datetime.now() 코드를 지우고 아래처럼 어제 날짜로 적습니다.
+today_hyphen = "2026-10-30"
+today_dot = "2026.10.30"
+today_short = "26.10.30"
 
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
 
