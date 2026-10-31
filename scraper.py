@@ -4,6 +4,7 @@ import urllib3
 from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.parse import urljoin
+import re  # 💡 문자열에서 숫자 추출 등을 위한 도구 추가
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -14,41 +15,58 @@ def send_message(text):
     if TOKEN and CHAT_ID:
         requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": text})
 
-# 기존의 datetime.now() 코드를 지우고 아래처럼 어제 날짜로 적습니다.
-today_hyphen = "2026-10-30"
-today_dot = "2026.10.30"
-today_short = "26.10.30"
+# 다시 원래대로 오늘 날짜를 스스로 찾도록 되돌려 놓았습니다.
+# (당장 테스트가 필요하면 이전처럼 "2026-10-30" 등으로 날짜를 잠시 고정해서 돌려보세요)
+today_hyphen = datetime.now().strftime("%Y-%m-%d")
+today_dot = datetime.now().strftime("%Y.%m.%d")
+today_short = datetime.now().strftime("%y.%m.%d")
 
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
 
 # ========================================
-# 1. 기계공학부 공지사항 (주소 php로 수정됨!)
+# 1. 기계공학부 공지사항 (제목 정리 및 JS 링크 추출)
 # ========================================
 try:
     url_me = "https://me.pusan.ac.kr/new/sub05/sub01_01.php"
     res_me = requests.get(url_me, verify=False, headers=headers)
-    # php 페이지는 보통 utf-8을 사용하므로 기존 euc-kr 강제 변환 코드는 제거했습니다.
     soup_me = BeautifulSoup(res_me.text, 'html.parser')
 
     rows_me = soup_me.select('table tr')
     for row in rows_me:
         tds = row.select('td')
         if len(tds) >= 4:
-            title_tag = row.select_one('a')
-            if title_tag:
-                title = title_tag.text.strip()
-                date_text = tds[-2].text.strip() # 보통 표의 뒤에서 두 번째 칸이 날짜
-                
-                link = title_tag.get('href', '')
-                full_link = urljoin(url_me, link)
-                
-                if today_hyphen in date_text or today_dot in date_text or today_short in date_text:
-                    send_message(f"[기계공학부] {title}\n👉 {full_link}")
+            # 표의 칸(td)을 하나씩 돌면서 링크(a)가 들어있는 진짜 제목 칸만 찾아냅니다.
+            for td in tds:
+                a_tag = td.select_one('a')
+                if a_tag:
+                    # 💡 1. 지저분한 엔터와 공백을 한 줄의 띄어쓰기로 깔끔하게 합칩니다.
+                    raw_title = td.text.strip()
+                    title = re.sub(r'\s+', ' ', raw_title) 
+                    
+                    date_text = tds[-2].text.strip()
+                    
+                    # 💡 2. 자바스크립트 코드에서 숫자(예: 5192)만 쏙 뽑아냅니다.
+                    link = a_tag.get('href', '')
+                    if 'javascript' in link:
+                        num_match = re.search(r'\d+', link)
+                        if num_match:
+                            seq = num_match.group()
+                            # 뽑아낸 숫자로 직접 접속 주소를 조립합니다.
+                            full_link = f"https://me.pusan.ac.kr/new/sub05/sub01_01.php?mode=read&idx={seq}"
+                        else:
+                            full_link = url_me
+                    else:
+                        full_link = urljoin(url_me, link)
+                    
+                    if today_hyphen in date_text or today_dot in date_text or today_short in date_text:
+                        send_message(f"[기계공학부] {title}\n👉 {full_link}")
+                    
+                    break # 글 하나를 찾았으면 옆 칸은 무시하고 다음 공지글로 넘어갑니다.
 except Exception as e:
     print(f"기계공학부 오류: {e}")
 
 # ========================================
-# 2. 대학본부 공지사항
+# 2. 대학본부 공지사항 (이전과 동일)
 # ========================================
 try:
     url_main = "https://www.pusan.ac.kr/kor/CMS/Board/Board.do?mCode=MN095"
