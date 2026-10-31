@@ -2,7 +2,7 @@ name: Notice Bot
 
 on:
   schedule:
-    - cron: '0 8 * * *' # 한국 시간으로 매일 오후 5시에 실행 (UTC 기준 08:00)
+    - cron: '50 14 * * *' # 한국 시간으로 매일 오후 23시 50분 에 실행 (UTC 기준 14:50)
   workflow_dispatch: # 수동 실행 버튼 활성화
 
 jobs:
