@@ -407,24 +407,25 @@ def main():
                 f"[{key}] 새로운 공지 {len(new_notices)}개 발견"
             )
 
+          
             # 새로운 공지 전송
-            test_notice = {
-    "source": "기계공학부",
-    "title": "텔레그램 알림 기능 테스트",
-    "date": "2026-11-01",
-    "link": URL_ME
-}
+            for notice in new_notices:
 
-message = (
-    f"📢 부산대학교 신규 공지사항\n\n"
-    f"📍 게시판: {test_notice['source']}\n"
-    f"📌 제목: {test_notice['title']}\n"
-    f"📅 게시 날짜: {test_notice['date']}\n\n"
-    f"🔗 공지 원문:\n"
-    f"{test_notice['link']}"
-)
+                message = (
+                    f"📢 부산대학교 신규 공지사항\n\n"
+                    f"📍 게시판: {notice['source']}\n"
+                    f"📌 제목: {notice['title']}\n"
+                    f"📅 게시 날짜: {notice['date']}\n\n"
+                    f"🔗 공지 원문:\n"
+                    f"{notice['link']}"
+                )
 
-send_message(message)
+                send_message(message)
+
+                print(
+                    f"전송 완료: {notice['title']}"
+                )
+
 
                 print(
                     f"전송 완료: {notice['title']}"
