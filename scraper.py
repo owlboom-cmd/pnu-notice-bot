@@ -147,9 +147,10 @@ def get_post_id(link):
 def get_me_notices():
 
     response = session.get(
-        URL_ME,
-        timeout=20
-    )
+    URL_ME,
+    timeout=20,
+    verify=False
+)
 
     response.raise_for_status()
 
