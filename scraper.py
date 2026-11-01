@@ -3,6 +3,11 @@ import os
 import re
 import json
 import requests
+import urllib3
+
+urllib3.disable_warnings(
+    urllib3.exceptions.InsecureRequestWarning
+)
 
 from pathlib import Path
 from urllib.parse import urljoin, urlparse, parse_qs
