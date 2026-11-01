@@ -467,6 +467,10 @@ send_message(message)
 # ========================================
 # 10. 프로그램 시작
 # ========================================
+# ========================================
+# 텔레그램 테스트
+# ========================================
+
 def test_telegram_message():
 
     test_notice = {
@@ -487,8 +491,7 @@ def test_telegram_message():
     send_message(message)
 
     print("테스트 메시지 전송 완료")
-
-
+    
 if __name__ == "__main__":
 
-    main()
+    test_telegram_message()
