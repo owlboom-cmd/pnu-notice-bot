@@ -5,6 +5,28 @@ import json
 import requests
 import urllib3
 
+# ========================================
+# 게시 날짜 추출
+# ========================================
+
+def get_post_date(row):
+
+    date_pattern = (
+        r"\d{4}[-./]\d{1,2}[-./]\d{1,2}"
+        r"|\d{2}[-./]\d{1,2}[-./]\d{1,2}"
+    )
+
+    for td in row.select("td"):
+
+        text = td.get_text(" ", strip=True)
+
+        match = re.search(date_pattern, text)
+
+        if match:
+            return match.group()
+
+    return "날짜 정보 없음"
+
 urllib3.disable_warnings(
     urllib3.exceptions.InsecureRequestWarning
 )
@@ -217,12 +239,13 @@ def get_me_notices():
 
         notices.append({
 
-            "id": post_id,
-            "title": title,
-            "link": full_link,
-            "source": "기계공학부"
+    "id": post_id,
+    "title": title,
+    "date": get_post_date(row),
+    "link": full_link,
+    "source": "기계공학부"
 
-        })
+})
 
     return notices
 
@@ -281,12 +304,13 @@ def get_main_notices():
 
         notices.append({
 
-            "id": post_id,
-            "title": title,
-            "link": full_link,
-            "source": "부산대학교"
+    "id": post_id,
+    "title": title,
+    "date": get_post_date(row),
+    "link": full_link,
+    "source": "부산대학교"
 
-        })
+})
 
     return notices
 
@@ -388,13 +412,18 @@ def main():
 
                 message = (
 
-                    f"📢 [{notice['source']}] 새 공지사항\n\n"
+    f"📢 부산대학교 신규 공지사항\n\n"
 
-                    f"📌 {notice['title']}\n\n"
+    f"📍 게시판: {notice['source']}\n"
 
-                    f"🔗 {notice['link']}"
+    f"📌 제목: {notice['title']}\n"
 
-                )
+    f"📅 게시 날짜: {notice['date']}\n\n"
+
+    f"🔗 공지 원문:\n"
+    f"{notice['link']}"
+
+)
 
                 send_message(message)
 
