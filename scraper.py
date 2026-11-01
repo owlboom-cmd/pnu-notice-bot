@@ -467,6 +467,27 @@ send_message(message)
 # ========================================
 # 10. 프로그램 시작
 # ========================================
+def test_telegram_message():
+
+    test_notice = {
+        "source": "기계공학부",
+        "title": "텔레그램 공지 알림 테스트",
+        "date": "2026-11-01",
+        "link": URL_ME
+    }
+
+    message = (
+        "📢 부산대학교 신규 공지사항\n\n"
+        f"📍 게시판: {test_notice['source']}\n"
+        f"📌 제목: {test_notice['title']}\n"
+        f"📅 게시 날짜: {test_notice['date']}\n\n"
+        f"🔗 공지 원문:\n{test_notice['link']}"
+    )
+
+    send_message(message)
+
+    print("테스트 메시지 전송 완료")
+
 
 if __name__ == "__main__":
 
