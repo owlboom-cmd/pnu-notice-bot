@@ -8,6 +8,7 @@ from pathlib import Path
 from urllib.parse import urljoin, urlparse, parse_qs
 from bs4 import BeautifulSoup
 
+
 # ========================================
 # 1. 기본 설정
 # ========================================
@@ -25,7 +26,10 @@ HEADERS = {
 session = requests.Session()
 session.headers.update(HEADERS)
 
+# 기계공학부 공지사항
 URL_ME = "https://me.pusan.ac.kr/new/sub05/sub01_01.php"
+
+# 부산대학교 대학본부 공지사항
 URL_MAIN = "https://www.pusan.ac.kr/kor/CMS/Board/Board.do?mCode=MN095"
 
 
@@ -34,6 +38,7 @@ URL_MAIN = "https://www.pusan.ac.kr/kor/CMS/Board/Board.do?mCode=MN095"
 # ========================================
 
 def send_message(text):
+
     if not TOKEN or not CHAT_ID:
         raise ValueError("텔레그램 환경변수가 설정되지 않았습니다.")
 
@@ -63,7 +68,7 @@ def send_message(text):
 def load_state():
 
     if not STATE_FILE.exists():
-        return None
+        return {}
 
     try:
         with STATE_FILE.open("r", encoding="utf-8") as f:
@@ -73,18 +78,27 @@ def load_state():
         raise RuntimeError(f"공지 기록 파일 오류: {e}")
 
 
+# ========================================
+# 4. 공지 기록 저장
+# ========================================
+
 def save_state(state):
 
     temp_file = STATE_FILE.with_suffix(".tmp")
 
     with temp_file.open("w", encoding="utf-8") as f:
-        json.dump(state, f, ensure_ascii=False, indent=2)
+        json.dump(
+            state,
+            f,
+            ensure_ascii=False,
+            indent=2
+        )
 
     temp_file.replace(STATE_FILE)
 
 
 # ========================================
-# 4. 게시글 고유번호 추출
+# 5. 게시글 고유번호 추출
 # ========================================
 
 def get_post_id(link):
@@ -92,35 +106,58 @@ def get_post_id(link):
     parsed = urlparse(link)
     params = parse_qs(parsed.query)
 
-    # 일반적인 게시판 게시글 번호
-    for key in ["idx", "no", "seq", "articleNo", "nttId"]:
+    keys = [
+        "idx",
+        "no",
+        "seq",
+        "articleNo",
+        "nttId",
+        "boardSeq",
+        "bbsSeq",
+        "boardNo",
+        "postNo"
+    ]
+
+    for key in keys:
+
         if key in params:
             return str(params[key][0])
 
-    # JavaScript 링크에 포함된 번호
-    match = re.search(r"\d+", link)
+    # JavaScript 링크에서만 숫자 추출
+    if link.lower().startswith("javascript"):
 
-    if match:
-        return match.group()
+        match = re.search(r"\d+", link)
 
-    # 고유번호를 찾을 수 없는 경우 링크 사용
+        if match:
+            return match.group()
+
+    # 게시글 번호를 찾지 못하면 URL 자체를 사용
     return link
 
 
 # ========================================
-# 5. 기계공학부 공지사항 크롤링
+# 6. 기계공학부 공지사항 크롤링
 # ========================================
 
 def get_me_notices():
 
-    response = session.get(URL_ME, timeout=20)
+    response = session.get(
+        URL_ME,
+        timeout=20
+    )
+
     response.raise_for_status()
 
-    soup = BeautifulSoup(response.text, "html.parser")
+    soup = BeautifulSoup(
+        response.text,
+        "html.parser"
+    )
 
     notices = []
 
-    for row in soup.select("table tr"):
+    rows = soup.select("table tr")
+
+    for row in rows:
 
         tds = row.select("td")
 
@@ -129,16 +166,20 @@ def get_me_notices():
 
         title_tag = None
 
+        # 실제 제목이 들어 있는 링크 찾기
         for td in tds:
+
             a_tag = td.select_one("a")
 
             if a_tag and a_tag.get_text(strip=True):
+
                 title_tag = a_tag
                 break
 
         if not title_tag:
             continue
 
+        # 제목 공백 정리
         title = re.sub(
             r"\s+",
             " ",
@@ -150,6 +191,7 @@ def get_me_notices():
         if not link:
             continue
 
+        # JavaScript 링크 처리
         if "javascript" in link.lower():
 
             post_id = get_post_id(link)
@@ -160,29 +202,42 @@ def get_me_notices():
 
         else:
 
-            full_link = urljoin(URL_ME, link)
+            full_link = urljoin(
+                URL_ME,
+                link
+            )
+
             post_id = get_post_id(full_link)
 
         notices.append({
+
             "id": post_id,
             "title": title,
             "link": full_link,
             "source": "기계공학부"
+
         })
 
     return notices
 
 
 # ========================================
-# 6. 부산대학교 대학본부 공지사항 크롤링
+# 7. 부산대학교 대학본부 공지사항 크롤링
 # ========================================
 
 def get_main_notices():
 
-    response = session.get(URL_MAIN, timeout=20)
+    response = session.get(
+        URL_MAIN,
+        timeout=20
+    )
+
     response.raise_for_status()
 
-    soup = BeautifulSoup(response.text, "html.parser")
+    soup = BeautifulSoup(
+        response.text,
+        "html.parser"
+    )
 
     notices = []
 
@@ -211,22 +266,27 @@ def get_main_notices():
         if not title or not link:
             continue
 
-        full_link = urljoin(URL_MAIN, link)
+        full_link = urljoin(
+            URL_MAIN,
+            link
+        )
 
         post_id = get_post_id(full_link)
 
         notices.append({
+
             "id": post_id,
             "title": title,
             "link": full_link,
             "source": "부산대학교"
+
         })
 
     return notices
 
 
 # ========================================
-# 7. 새로운 공지사항 확인
+# 8. 새로운 공지사항 확인
 # ========================================
 
 def check_new_notices(notices, previous_ids):
@@ -234,8 +294,11 @@ def check_new_notices(notices, previous_ids):
     previous = set(previous_ids)
 
     new_notices = [
-        notice for notice in notices
+
+        notice
+        for notice in notices
         if notice["id"] not in previous
+
     ]
 
     # 오래된 공지부터 전송
@@ -243,93 +306,133 @@ def check_new_notices(notices, previous_ids):
 
 
 # ========================================
-# 8. 메인 실행
+# 9. 메인 실행
 # ========================================
 
 def main():
 
-    print("공지사항 확인 시작")
+    print("================================")
+    print("부산대학교 공지사항 확인 시작")
+    print("================================")
 
     state = load_state()
 
-    # 첫 실행: 기존 공지를 기준점으로 저장
-    first_run = state is None
-
-    if first_run:
-        state = {
-            "me": [],
-            "main": []
-        }
-
-    # 사이트별로 독립적으로 수집
+    # 홈페이지별 독립적인 기록 관리
     sources = [
+
         ("me", get_me_notices),
+
         ("main", get_main_notices)
+
     ]
 
     for key, scraper in sources:
 
         try:
 
+            print(f"\n[{key}] 공지사항 수집 중...")
+
+            # 공지사항 수집
             notices = scraper()
 
             if not notices:
-                print(f"{key}: 공지가 없거나 게시글을 찾지 못했습니다.")
+
+                print(
+                    f"[{key}] 공지를 찾지 못했습니다."
+                )
+
                 continue
 
-            previous_ids = state.get(key, [])
+            print(
+                f"[{key}] 전체 공지 {len(notices)}개 발견"
+            )
 
-            if first_run:
+            # 최초 실행 또는 해당 사이트의 최초 성공 실행
+            if key not in state:
 
                 state[key] = [
+
                     notice["id"]
                     for notice in notices
+
                 ][:MAX_HISTORY]
 
-                print(f"{key}: 기존 공지 {len(notices)}개 기준 등록")
+                print(
+                    f"[{key}] 기존 공지를 기준점으로 등록했습니다."
+                )
+
                 continue
 
+            # 기존 공지 번호 불러오기
+            previous_ids = state[key]
+
+            # 새로운 공지 확인
             new_notices = check_new_notices(
                 notices,
                 previous_ids
             )
 
-            print(f"{key}: 새로운 공지 {len(new_notices)}개")
+            print(
+                f"[{key}] 새로운 공지 {len(new_notices)}개 발견"
+            )
 
+            # 새로운 공지 전송
             for notice in new_notices:
 
                 message = (
+
                     f"📢 [{notice['source']}] 새 공지사항\n\n"
+
                     f"📌 {notice['title']}\n\n"
+
                     f"🔗 {notice['link']}"
+
                 )
 
                 send_message(message)
 
-                print(f"전송 완료: {notice['title']}")
+                print(
+                    f"전송 완료: {notice['title']}"
+                )
 
-            # 성공적으로 수집하고 새 공지 전송까지 완료한 경우에만 기록
+            # 기존 기록과 새로운 공지 기록 합치기
             new_ids = [
-                notice["id"] for notice in notices
+
+                notice["id"]
+                for notice in notices
+
             ]
 
             combined = list(dict.fromkeys(
+
                 new_ids + previous_ids
+
             ))
 
+            # 최대 300개까지 저장
             state[key] = combined[:MAX_HISTORY]
 
         except Exception as e:
 
-            print(f"{key} 처리 오류: {e}")
+            print(
+                f"[{key}] 오류 발생: {e}"
+            )
 
-            # 실패한 사이트의 이전 기록은 유지
+            # 오류가 발생하면 기존 기록 유지
             continue
 
+    # 공지 기록 저장
     save_state(state)
 
+    print("\n================================")
     print("공지사항 확인 종료")
+    print("================================")
 
+
+# ========================================
+# 10. 프로그램 시작
+# ========================================
 
 if __name__ == "__main__":
+
     main()
