@@ -6,6 +6,8 @@ on:
     - cron: '3-59/10 * * * *'
 
   workflow_dispatch:
+  repository_dispatch:
+    types: [notice_check]
 
 # GitHub 저장소에 공지 기록을 저장하기 위한 권한
 permissions:
