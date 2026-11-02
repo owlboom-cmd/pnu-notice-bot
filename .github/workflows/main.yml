@@ -2,8 +2,6 @@
 name: Notice Bot
 
 on:
-  schedule:
-    - cron: '3-59/10 * * * *'
 
   workflow_dispatch:
   repository_dispatch:
