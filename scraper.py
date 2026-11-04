@@ -89,6 +89,37 @@ def send_message(text):
 
 
 # ========================================
+# 2-1. ntfy 메시지 전송
+# ========================================
+
+def send_ntfy_message(text):
+
+    topic = os.getenv("NTFY_TOPIC")
+
+    if not topic:
+        print("NTFY_TOPIC이 설정되지 않았습니다.")
+        return
+
+    try:
+        response = requests.post(
+            f"https://ntfy.sh/{topic}",
+            data=text.encode("utf-8"),
+            headers={
+                "Title": "부산대학교 공지 알림",
+                "Priority": "default",
+                "Tags": "school"
+            },
+            timeout=15
+        )
+
+        response.raise_for_status()
+        print("ntfy 알림 전송 성공")
+
+    except requests.RequestException as e:
+        print(f"ntfy 알림 전송 실패: {e}")
+
+
+# ========================================
 # 3. 기존 공지 기록 불러오기
 # ========================================
 
