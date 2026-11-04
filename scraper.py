@@ -462,10 +462,6 @@ def main():
                 )
 
 
-                print(
-                    f"전송 완료: {notice['title']}"
-                )
-
             # 기존 기록과 새로운 공지 기록 합치기
             new_ids = [
 
