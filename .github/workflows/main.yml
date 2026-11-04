@@ -42,7 +42,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. 공지사항 확인 및 텔레그램 전송
+      # 4. 공지사항 확인 및 알림 전송
       - name: 공지사항 확인
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
