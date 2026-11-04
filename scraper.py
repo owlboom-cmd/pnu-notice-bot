@@ -451,12 +451,12 @@ def main():
                     f"🔗 공지 원문:\n"
                     f"{notice['link']}"
                 )
-
-                # ntfy 알림 전송
-                send_ntfy_message(message)
-
+                
                 # 기존 Telegram 알림 전송
                 send_message(message)
+                
+                # ntfy 알림 전송
+                send_ntfy_message(message)
 
                 print(
                     f"전송 완료: {notice['title']}"
