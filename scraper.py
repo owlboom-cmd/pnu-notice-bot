@@ -102,12 +102,13 @@ def send_ntfy_message(text):
 
     try:
         response = requests.post(
-            f"https://ntfy.sh/{topic}",
-            data=text.encode("utf-8"),
-            headers={
-                "Title": "부산대학교 공지 알림",
-                "Priority": "default",
-                "Tags": "school"
+            "https://ntfy.sh/",
+            json={
+                "topic": topic,
+                "title": "부산대학교 공지 알림",
+                "message": text,
+                "priority": 3,
+                "tags": ["school"]
             },
             timeout=15
         )
@@ -115,7 +116,7 @@ def send_ntfy_message(text):
         response.raise_for_status()
         print("ntfy 알림 전송 성공")
 
-    except requests.RequestException as e:
+    except Exception as e:
         print(f"ntfy 알림 전송 실패: {e}")
 
 
