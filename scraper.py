@@ -4,9 +4,7 @@ import re
 import json
 import requests
 import urllib3
-import Path
-import urljoin, urlparse, parse_qs
-import BeautifulSoup
+
 
 # ========================================
 # 게시 날짜 추출
@@ -34,9 +32,9 @@ urllib3.disable_warnings(
     urllib3.exceptions.InsecureRequestWarning
 )
 
-from pathlib
-from urllib.parse
-from bs4
+from pathlib import Path
+from urllib.parse import urljoin, urlparse, parse_qs
+from bs4 import BeautifulSoup
 
 
 # ========================================
