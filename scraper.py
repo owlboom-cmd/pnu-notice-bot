@@ -451,6 +451,10 @@ def main():
                     f"{notice['link']}"
                 )
 
+                # ntfy 알림 전송
+                send_ntfy_message(message)
+
+                # 기존 Telegram 알림 전송
                 send_message(message)
 
                 print(
