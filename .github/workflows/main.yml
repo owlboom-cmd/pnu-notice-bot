@@ -81,15 +81,3 @@ jobs:
               --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
               --data-urlencode "text=⚠️ 부산대학교 Notice Bot 오류 발생! GitHub Actions 실행 로그를 확인해주세요."
           fi
-          
-      # 7. nfty 공지 발송
-      - name: Send ntfy notification
-        if: always()
-        env:
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-          JOB_STATUS: ${{ job.status }}
-        run: |
-          curl -H "Title: GitHub Actions 알림" \
-               -H "Priority: 4" \
-               -d "PNU Notice Bot 실행 결과: ${JOB_STATUS}" \
-               "https://ntfy.sh/${NTFY_TOPIC}"
