@@ -68,17 +68,34 @@ jobs:
             echo "저장할 새로운 공지 기록이 없습니다."
           fi
 
-      # 6. 프로그램 오류 발생 시 텔레그램 알림
+     
+      # 6. 프로그램 오류 발생 시 텔레그램 및 ntfy 알림
       - name: 오류 알림
         if: failure()
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: |
+          ERROR_MESSAGE="⚠️ 부산대학교 Notice Bot 오류 발생! GitHub Actions 실행 로그를 확인해주세요."
+
+          # 텔레그램 오류 알림
           if [ -n "$TELEGRAM_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
             curl --fail-with-body --silent --show-error \
               --request POST \
               "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
               --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-              --data-urlencode "text=⚠️ 부산대학교 Notice Bot 오류 발생! GitHub Actions 실행 로그를 확인해주세요."
+              --data-urlencode "text=${ERROR_MESSAGE}" || true
           fi
+
+          # ntfy 오류 알림
+          if [ -n "$NTFY_TOPIC" ]; then
+            curl --fail-with-body --silent --show-error \
+              --request POST \
+              "https://ntfy.sh/${NTFY_TOPIC}" \
+              --header "Title: 부산대학교 Notice Bot 오류" \
+              --header "Priority: urgent" \
+              --header "Tags: warning" \
+              --data-binary "$ERROR_MESSAGE" || true
+          fi
+
