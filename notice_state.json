@@ -7,6 +7,7 @@
     "https://www.pusan.ac.kr/kor/CMS/Board/Board.do?mCode=MN095&mode=view&mgr_seq=3&board_seq=1511965",
     "https://www.pusan.ac.kr/kor/CMS/Board/Board.do?mCode=MN095&mode=view&mgr_seq=3&board_seq=1511938",
     "https://www.pusan.ac.kr/kor/CMS/Board/Board.do?mCode=MN095&mode=view&mgr_seq=3&board_seq=1509643",
+    "https://www.pusan.ac.kr/kor/CMS/Board/Board.do?mCode=MN095&mode=view&mgr_seq=3&board_seq=1512291",
     "https://www.pusan.ac.kr/kor/CMS/Board/Board.do?mCode=MN095&mode=view&mgr_seq=3&board_seq=1512245",
     "https://www.pusan.ac.kr/kor/CMS/Board/Board.do?mCode=MN095&mode=view&mgr_seq=3&board_seq=1512240",
     "https://www.pusan.ac.kr/kor/CMS/Board/Board.do?mCode=MN095&mode=view&mgr_seq=3&board_seq=1512239",
@@ -151,14 +152,14 @@
     "5184"
   ],
   "linkareer": [
-    "360431",
     "358856",
     "359946",
     "358971",
+    "362183",
     "360963",
     "359442",
-    "363324",
     "356503",
+    "361051",
     "365200",
     "365185",
     "365135",
@@ -179,6 +180,8 @@
     "364823",
     "364821",
     "364819",
+    "360431",
+    "363324",
     "364818",
     "364817",
     "365034",
@@ -192,9 +195,7 @@
     "364702",
     "364691",
     "364670",
-    "362183",
     "358929",
-    "361051",
     "364827"
   ]
 }
